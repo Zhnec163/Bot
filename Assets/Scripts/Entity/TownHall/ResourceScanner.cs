@@ -35,7 +35,7 @@ public class ResourceScanner : MonoBehaviour
             });
 
             if (_resources.Count > 0)
-                OnResourcesDiscovered.Invoke(_resources);
+                OnResourcesDiscovered?.Invoke(_resources);
         }
     }
 }

@@ -1,7 +1,6 @@
 using TMPro;
 using UnityEngine;
 
-
 public class ResourceBalanceView : MonoBehaviour
 {
     [SerializeField] private ResourceBalance _resourceBalance;

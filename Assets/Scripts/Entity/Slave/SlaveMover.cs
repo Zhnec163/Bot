@@ -28,6 +28,6 @@ public class SlaveMover : MonoBehaviour
             yield return null;
         }
         
-        onMoveEnd.Invoke();
+        onMoveEnd?.Invoke();
     }
 }

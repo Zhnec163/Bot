@@ -7,9 +7,9 @@ public class ResourceSpawner : MonoBehaviour
     [SerializeField] private Resource _prefab;
     [SerializeField] private float _spawnRadius;
     [SerializeField] private float _spawnTimeStep;
-    private WaitForSeconds _spawnDelay;
 
     private ObjectPool<Resource> _pool;
+    private WaitForSeconds _spawnDelay;
 
     private void Awake()
     {
