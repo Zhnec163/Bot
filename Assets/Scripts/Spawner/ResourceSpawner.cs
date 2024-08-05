@@ -14,39 +14,33 @@ public class ResourceSpawner : MonoBehaviour
     private void Awake()
     {
         _pool = new ObjectPool<Resource>(
-            createFunc: HandleActionOnCreate,
-            actionOnGet: HandleActionOnGet,
-            actionOnRelease: obj => HandleActionOnRelease(obj),
-            actionOnDestroy: obj => HandleActionOnDestroy(obj));
+            createFunc: OnCreate,
+            actionOnGet: OnGet,
+            actionOnRelease: obj => OnRelease(obj));
         
         _spawnDelay = new WaitForSeconds(_spawnTimeStep);
         StartCoroutine(SpawningResources());
     }
 
-    private Resource HandleActionOnCreate()
+    private Resource OnCreate()
     {
         Resource resource = Instantiate(_prefab, CalculateSpawnPosition(), Quaternion.identity);
-        resource.Init(this);
+        resource.Delivered += OnResourceDelivered;
         return resource;
     }
-    
-    private void HandleActionOnGet(Resource resource)
+
+    private void OnGet(Resource resource)
     {
         resource.transform.position = CalculateSpawnPosition();
         resource.gameObject.SetActive(true);
     }
 
-    private void HandleActionOnRelease(Resource resource)
+    private void OnRelease(Resource resource)
     {
         resource.gameObject.SetActive(false);
     }
 
-    private void HandleActionOnDestroy(Resource resource)
-    {
-        Destroy(resource.gameObject);
-    }
-
-    public void Release(Resource resource)
+    private void OnResourceDelivered(Resource resource)
     {
         _pool.Release(resource);
     }

@@ -6,7 +6,7 @@ public class Slave : MonoBehaviour
 {
     [SerializeField] private Transform _resourceAttachPoint;
 
-    private TownHall _townHall;
+    private Vector3 _townHallPosition;
     private SlaveMover _slaveMover;
     private Resource _resource;
     private Action<Resource> _onResourceDelivered;
@@ -15,12 +15,12 @@ public class Slave : MonoBehaviour
 
     private void Awake()
     {
-        _slaveMover = GetComponent<SlaveMover>();
+		_slaveMover = GetComponent<SlaveMover>();
     }
 
-    public void Init(TownHall townHall, Action<Resource> onResourceDelivered)
+    public void Init(Vector3 townHallPosition, Action<Resource> onResourceDelivered)
     {
-        _townHall = townHall;
+        _townHallPosition = townHallPosition;
         _onResourceDelivered += onResourceDelivered;
     }
 
@@ -28,18 +28,20 @@ public class Slave : MonoBehaviour
     {
         IsWorking = true;
         _resource = resource;
-        _slaveMover.MoveTo(_resource.transform.position, HandleArrivalToResource);
+        _slaveMover.MoveTo(_resource.transform.position, OnArrivedResource);
     }
 
-    private void HandleArrivalToResource()
+    private void OnArrivedResource()
     {
-        _resource.Attach(transform, _resourceAttachPoint.position);
-        _slaveMover.MoveTo(_townHall.transform.position, HandleReturnOnBase);
+        _resource.transform.SetParent(transform);
+        _resource.transform.position = _resourceAttachPoint.position;
+        _slaveMover.MoveTo(_townHallPosition, OnReturnedBase);
     }
 
-    private void HandleReturnOnBase()
+    private void OnReturnedBase()
     {
         _onResourceDelivered?.Invoke(_resource);
+        _resource.transform.SetParent(null);
         _resource.Release();
         _resource = null;
         IsWorking = false;

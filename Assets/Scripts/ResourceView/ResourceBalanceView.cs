@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 
+[RequireComponent(typeof(TMP_Text))]
 public class ResourceBalanceView : MonoBehaviour
 {
     [SerializeField] private ResourceBalance _resourceBalance;
@@ -9,13 +10,11 @@ public class ResourceBalanceView : MonoBehaviour
 
     private void Awake()
     {
-        if (TryGetComponent(out TMP_Text text))
-            _text = text;
-        
-        _resourceBalance.OnChange += HandleBalanceChangeAction;
+        _text = GetComponent<TMP_Text>();
+        _resourceBalance.Change += OnBalanceChanged;
     }
 
-    private void HandleBalanceChangeAction()
+    private void OnBalanceChanged()
     {
         if (_resourceBalance != null)
             _text.text = _resourceBalance.Balance.ToString();

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,49 +7,54 @@ using UnityEngine;
 public class TownHall : MonoBehaviour
 {
     [SerializeField] private List<Slave> _slaves;
+    [SerializeField] private float _updateRate;
 
     private ResourceBalance _resourceBalance;
     private ResourceScanner _resourceScanner;
     private List<Resource> _processedResources = new();
+    private WaitForSeconds _updateDelay;
     
     private void Awake()
     {
         if (_slaves.Count > 0)
-            _slaves.ForEach(slave => slave.Init(this, HandleOnResourceDelivered));
+            _slaves.ForEach(slave => slave.Init(transform.position, OnResourceDelivered));
         
         _resourceBalance = GetComponent<ResourceBalance>();
         _resourceScanner = GetComponent<ResourceScanner>();
-        _resourceScanner.Init(HandleOnResourcesDiscovered);
+        _updateDelay = new WaitForSeconds(_updateRate);
+        StartCoroutine(Working());
     }
 
-    private void HandleOnResourcesDiscovered(List<Resource> resourcesToProcess)
+    private IEnumerator Working()
     {
-        if (_slaves.Count == 0)
-            return;
-
-        List<Slave> _freeSlave = _slaves.Where(slave => slave.IsWorking == false).ToList();
-
-        if (_freeSlave.Count > 0)
+        while (enabled)
         {
-            resourcesToProcess = resourcesToProcess.Except(_processedResources).ToList();
+            yield return _updateDelay;
+            List<Slave> _freeSlave = _slaves.Where(slave => slave.IsWorking == false).ToList();
 
-            if (resourcesToProcess.Count == 0)
-                return;
-            
-            _freeSlave.ForEach(slave =>
+            if (_freeSlave.Count > 0)
             {
-                if (resourcesToProcess.Count > 0)
+                List<Resource> resources = _resourceScanner.Search();
+                resources = resources.Except(_processedResources).ToList();
+                
+                if (resources.Count == 0)
+                    continue;
+
+                _freeSlave.ForEach(slave =>
                 {
-                    Resource resource = resourcesToProcess[0];
-                    _processedResources.Add(resource);
-                    slave.Collect(resource);
-                    resourcesToProcess.Remove(resource);
-                }
-            });
+                    if (resources.Count > 0)
+                    {
+                        Resource resource = resources[0];
+                        _processedResources.Add(resource);
+                        slave.Collect(resource);
+                        resources.Remove(resource);
+                    }
+                });
+            }
         }
     }
 
-    private void HandleOnResourceDelivered(Resource resource)
+    private void OnResourceDelivered(Resource resource)
     {
         _processedResources.Remove(resource);
         _resourceBalance.Increment(); 

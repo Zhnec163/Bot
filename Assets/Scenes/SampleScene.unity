@@ -244,6 +244,7 @@ MonoBehaviour:
   - {fileID: 744269271}
   - {fileID: 118096212}
   - {fileID: 656458135}
+  _updateRate: 1
 --- !u!224 &542733490
 RectTransform:
   m_ObjectHideFlags: 0
@@ -313,7 +314,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _scanRadius: 5
-  _scanTimeStep: 2
   _resourceMask:
     serializedVersion: 2
     m_Bits: 64

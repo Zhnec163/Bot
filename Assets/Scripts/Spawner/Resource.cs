@@ -1,23 +1,17 @@
+using System;
 using UnityEngine;
 
 public class Resource : MonoBehaviour
 {
-    private ResourceSpawner _resourceSpawner;
+    public event Action<Resource> Delivered;
 
-    public void Init(ResourceSpawner resourceSpawner)
+    private void OnDestroy()
     {
-        _resourceSpawner = resourceSpawner;
+        Delivered = null;
     }
-    
-    public void Attach(Transform parent, Vector3 attachPoint)
-    {
-        transform.SetParent(parent);
-        transform.position = attachPoint;
-    }
-    
+
     public void Release()
     {
-        _resourceSpawner.Release(this);
-        transform.SetParent(null);
+        Delivered?.Invoke(this);
     }
 }

@@ -14,13 +14,13 @@ public class SlaveMover : MonoBehaviour
         _minSqrDistance = _minDistance * _minDistance;
     }
     
-    public void MoveTo(Vector3 position, Action onMoveEnd)
+    public void MoveTo(Vector3 position, Action onFinishedMovement)
     {
         transform.LookAt(position);
-        StartCoroutine(Moving(position, onMoveEnd));
+        StartCoroutine(Moving(position, onFinishedMovement));
     }
 
-    private IEnumerator Moving(Vector3 position, Action onMoveEnd)
+    private IEnumerator Moving(Vector3 position, Action onFinishedMovement)
     {
         while ((transform.position - position).sqrMagnitude > _minSqrDistance)
         {
@@ -28,6 +28,6 @@ public class SlaveMover : MonoBehaviour
             yield return null;
         }
         
-        onMoveEnd?.Invoke();
+        onFinishedMovement?.Invoke();
     }
 }
