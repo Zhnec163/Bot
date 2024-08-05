@@ -33,17 +33,27 @@ public class Slave : MonoBehaviour
 
     private void OnArrivedResource()
     {
-        _resource.transform.SetParent(transform);
-        _resource.transform.position = _resourceAttachPoint.position;
+        AttachResource();
         _slaveMover.MoveTo(_townHallPosition, OnReturnedBase);
     }
 
     private void OnReturnedBase()
     {
         _onResourceDelivered?.Invoke(_resource);
+        ReleaseResource();
+        IsWorking = false;
+    }
+
+    private void AttachResource()
+    {
+        _resource.transform.SetParent(transform);
+        _resource.transform.position = _resourceAttachPoint.position;
+    }
+    
+    private void ReleaseResource()
+    {
         _resource.transform.SetParent(null);
         _resource.Release();
         _resource = null;
-        IsWorking = false;
     }
 }
