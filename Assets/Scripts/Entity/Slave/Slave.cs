@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 [RequireComponent(typeof(SlaveMover))]
@@ -6,10 +5,9 @@ public class Slave : MonoBehaviour
 {
     [SerializeField] private Transform _resourceAttachPoint;
 
-    private Vector3 _townHallPosition;
+    private TownHall _townHall;
     private SlaveMover _slaveMover;
     private Resource _resource;
-    private Action<Resource> _onResourceDelivered;
 
     public bool IsWorking { get; private set; }
 
@@ -18,13 +16,12 @@ public class Slave : MonoBehaviour
 		_slaveMover = GetComponent<SlaveMover>();
     }
 
-    public void Init(Vector3 townHallPosition, Action<Resource> onResourceDelivered)
+    public void Init(TownHall townHall)
     {
-        _townHallPosition = townHallPosition;
-        _onResourceDelivered += onResourceDelivered;
+        _townHall = townHall;
     }
 
-    public void Collect(Resource resource)
+    public void BringResource(Resource resource)
     {
         IsWorking = true;
         _resource = resource;
@@ -34,12 +31,12 @@ public class Slave : MonoBehaviour
     private void OnArrivedResource()
     {
         AttachResource();
-        _slaveMover.MoveTo(_townHallPosition, OnReturnedBase);
+        _slaveMover.MoveTo(_townHall.transform.position, OnReturnedBase);
     }
 
     private void OnReturnedBase()
     {
-        _onResourceDelivered?.Invoke(_resource);
+        _townHall.AddCollectedResource(_resource);
         ReleaseResource();
         IsWorking = false;
     }

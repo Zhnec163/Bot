@@ -25,7 +25,7 @@ public class ResourceSpawner : MonoBehaviour
     private Resource OnCreate()
     {
         Resource resource = Instantiate(_prefab, CalculateSpawnPosition(), Quaternion.identity);
-        resource.Delivered += OnResourceDelivered;
+        resource.Init(OnResourceDelivered);
         return resource;
     }
 

@@ -3,15 +3,20 @@ using UnityEngine;
 
 public class Resource : MonoBehaviour
 {
-    public event Action<Resource> Delivered;
+    private Action<Resource> _delivered;
 
     private void OnDestroy()
     {
-        Delivered = null;
+        _delivered = null;
+    }
+
+    public void Init(Action<Resource> onDelivered)
+    {
+        _delivered += onDelivered;
     }
 
     public void Release()
     {
-        Delivered?.Invoke(this);
+        _delivered?.Invoke(this);
     }
 }

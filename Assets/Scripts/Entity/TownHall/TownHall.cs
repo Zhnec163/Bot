@@ -16,13 +16,17 @@ public class TownHall : MonoBehaviour
     
     private void Awake()
     {
-        if (_slaves.Count > 0)
-            _slaves.ForEach(slave => slave.Init(transform.position, OnResourceDelivered));
-        
+        _slaves.ForEach(slave => slave.Init(this));
         _resourceBalance = GetComponent<ResourceBalance>();
         _resourceScanner = GetComponent<ResourceScanner>();
         _updateDelay = new WaitForSeconds(_updateRate);
         StartCoroutine(Working());
+    }
+    
+    public void AddCollectedResource(Resource resource)
+    {
+        _processedResources.Remove(resource);
+        _resourceBalance.Increment(); 
     }
 
     private IEnumerator Working()
@@ -37,26 +41,17 @@ public class TownHall : MonoBehaviour
                 List<Resource> resources = _resourceScanner.Search();
                 resources = resources.Except(_processedResources).ToList();
                 
-                if (resources.Count == 0)
-                    continue;
-
-                _freeSlave.ForEach(slave =>
+                foreach (var slave in _freeSlave)
                 {
-                    if (resources.Count > 0)
-                    {
-                        Resource resource = resources[0];
-                        _processedResources.Add(resource);
-                        slave.Collect(resource);
-                        resources.Remove(resource);
-                    }
-                });
+                    if (resources.Count == 0)
+                        break;
+                    
+                    Resource resource = resources[0];
+                    _processedResources.Add(resource);
+                    slave.BringResource(resource);
+                    resources.Remove(resource);
+                }
             }
         }
-    }
-
-    private void OnResourceDelivered(Resource resource)
-    {
-        _processedResources.Remove(resource);
-        _resourceBalance.Increment(); 
     }
 }

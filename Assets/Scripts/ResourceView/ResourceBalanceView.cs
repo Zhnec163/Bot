@@ -14,6 +14,11 @@ public class ResourceBalanceView : MonoBehaviour
         _resourceBalance.Change += OnBalanceChanged;
     }
 
+    private void OnDisable()
+    {
+        _resourceBalance.Change -= OnBalanceChanged;
+    }
+
     private void OnBalanceChanged()
     {
         if (_resourceBalance != null)
