@@ -1,42 +1,45 @@
+using System;
 using UnityEngine;
 
-[RequireComponent(typeof(SlaveMover))]
-public class Slave : MonoBehaviour
+[RequireComponent(typeof(BotMover))]
+public class Bot : MonoBehaviour
 {
     [SerializeField] private Transform _resourceAttachPoint;
 
-    private TownHall _townHall;
-    private SlaveMover _slaveMover;
+    private BotMover _botMover;
     private Resource _resource;
+    private Transform _collectZone;
+    
+    public event Action<Resource> ResourceDelivered;
 
     public bool IsWorking { get; private set; }
 
     private void Awake()
     {
-		_slaveMover = GetComponent<SlaveMover>();
+		_botMover = GetComponent<BotMover>();
     }
 
-    public void Init(TownHall townHall)
+    public void Init(Base commandCenter)
     {
-        _townHall = townHall;
+        _collectZone = commandCenter.CollectZone;
     }
 
     public void BringResource(Resource resource)
     {
         IsWorking = true;
         _resource = resource;
-        _slaveMover.MoveTo(_resource.transform.position, OnArrivedResource);
+        _botMover.MoveTo(_resource.transform.position, OnArrivedResource);
     }
 
     private void OnArrivedResource()
     {
         AttachResource();
-        _slaveMover.MoveTo(_townHall.transform.position, OnReturnedBase);
+        _botMover.MoveTo(_collectZone.position, OnReturnedBase);
     }
 
     private void OnReturnedBase()
     {
-        _townHall.AddCollectedResource(_resource);
+        ResourceDelivered?.Invoke(_resource);
         ReleaseResource();
         IsWorking = false;
     }

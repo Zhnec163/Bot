@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class SlaveMover : MonoBehaviour
+public class BotMover : MonoBehaviour
 {
     [SerializeField] private float _speed;
 

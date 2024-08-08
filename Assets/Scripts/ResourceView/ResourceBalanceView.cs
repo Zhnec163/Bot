@@ -11,12 +11,12 @@ public class ResourceBalanceView : MonoBehaviour
     private void Awake()
     {
         _text = GetComponent<TMP_Text>();
-        _resourceBalance.Change += OnBalanceChanged;
+        _resourceBalance.Changed += OnBalanceChanged;
     }
 
     private void OnDisable()
     {
-        _resourceBalance.Change -= OnBalanceChanged;
+        _resourceBalance.Changed -= OnBalanceChanged;
     }
 
     private void OnBalanceChanged()
