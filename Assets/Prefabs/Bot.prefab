@@ -82,6 +82,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _resourceAttachPoint: {fileID: 4065949618383643185}
+  _basePrefab: {fileID: 7340594150533044117, guid: 30ea1b928accf5941b46bf3b79f4a6ec, type: 3}
 --- !u!114 &7825551577836300738
 MonoBehaviour:
   m_ObjectHideFlags: 0

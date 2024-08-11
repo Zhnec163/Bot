@@ -5,12 +5,15 @@ using UnityEngine;
 public class Bot : MonoBehaviour
 {
     [SerializeField] private Transform _resourceAttachPoint;
+    [SerializeField] private Base _basePrefab;
 
+    private Vector3 _constructionPosition;
     private BotMover _botMover;
     private Resource _resource;
-    private Transform _collectZone;
+    private Vector3 _collectZonePosition;
     
     public event Action<Resource> ResourceDelivered;
+    public event Action ConstructionCompleted;
 
     public bool IsWorking { get; private set; }
 
@@ -19,9 +22,16 @@ public class Bot : MonoBehaviour
 		_botMover = GetComponent<BotMover>();
     }
 
-    public void Init(Base commandCenter)
+    public void Init(Vector3 collectZonePosition)
     {
-        _collectZone = commandCenter.CollectZone;
+        _collectZonePosition = collectZonePosition;
+    }
+
+    public void BuildBase(Vector3 position)
+    {
+        IsWorking = true;
+        _constructionPosition = position;
+        _botMover.MoveTo(_constructionPosition, OnArrivedBuildPosition);
     }
 
     public void BringResource(Resource resource)
@@ -30,11 +40,19 @@ public class Bot : MonoBehaviour
         _resource = resource;
         _botMover.MoveTo(_resource.transform.position, OnArrivedResource);
     }
+    
+    private void OnArrivedBuildPosition()
+    {
+        Base commandCenter = Instantiate(_basePrefab, _constructionPosition, _basePrefab.transform.rotation);
+        commandCenter.Init(this);
+        ConstructionCompleted?.Invoke();
+        IsWorking = false;
+    }
 
     private void OnArrivedResource()
     {
         AttachResource();
-        _botMover.MoveTo(_collectZone.position, OnReturnedBase);
+        _botMover.MoveTo(_collectZonePosition, OnReturnedBase);
     }
 
     private void OnReturnedBase()
