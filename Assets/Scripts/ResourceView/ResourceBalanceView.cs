@@ -5,7 +5,7 @@ using UnityEngine;
 public class ResourceBalanceView : MonoBehaviour
 {
     [SerializeField] private ResourceBalance _resourceBalance;
-    
+
     private TMP_Text _text;
 
     private void Awake()
@@ -21,7 +21,6 @@ public class ResourceBalanceView : MonoBehaviour
 
     private void OnBalanceChanged()
     {
-        if (_resourceBalance != null)
-            _text.text = _resourceBalance.Balance.ToString();
+        _text.text = _resourceBalance.Balance.ToString();
     }
 }

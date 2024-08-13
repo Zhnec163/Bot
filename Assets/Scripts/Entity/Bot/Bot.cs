@@ -1,19 +1,17 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(BotMover))]
 public class Bot : MonoBehaviour
 {
     [SerializeField] private Transform _resourceAttachPoint;
-    [SerializeField] private Base _basePrefab;
 
-    private Vector3 _constructionPosition;
-    private BotMover _botMover;
-    private Resource _resource;
     private Vector3 _collectZonePosition;
-    
+    private BotMover _botMover;
+
     public event Action<Resource> ResourceDelivered;
-    public event Action ConstructionCompleted;
+    public event Action<Bot> ConstructionCompleted;
 
     public bool IsWorking { get; private set; }
 
@@ -27,51 +25,42 @@ public class Bot : MonoBehaviour
         _collectZonePosition = collectZonePosition;
     }
 
-    public void BuildBase(Vector3 position)
-    {
-        IsWorking = true;
-        _constructionPosition = position;
-        _botMover.MoveTo(_constructionPosition, OnArrivedBuildPosition);
-    }
-
-    public void BringResource(Resource resource)
-    {
-        IsWorking = true;
-        _resource = resource;
-        _botMover.MoveTo(_resource.transform.position, OnArrivedResource);
-    }
+    public void BringResource(Resource resource) => StartCoroutine(ResourceCollecting(resource));
     
-    private void OnArrivedBuildPosition()
+    public void BuildBase(BaseCreator baseCreator, Vector3 position, ResourceFinder resourceFinder) => StartCoroutine(BaseBuilding(baseCreator, position, resourceFinder));
+
+    private IEnumerator ResourceCollecting(Resource resource)
     {
-        Base commandCenter = Instantiate(_basePrefab, _constructionPosition, _basePrefab.transform.rotation);
-        commandCenter.Init(this);
-        ConstructionCompleted?.Invoke();
+        IsWorking = true;
+        _botMover.MoveTo(resource.transform.position);
+        yield return new WaitUntil(() => _botMover.IsNearTarget());
+        AttachResource(resource);
+        _botMover.MoveTo(_collectZonePosition);
+        yield return new WaitUntil(() => _botMover.IsNearTarget());
+        ResourceDelivered?.Invoke(resource);
+        ReleaseResource(resource);
         IsWorking = false;
     }
 
-    private void OnArrivedResource()
+    private IEnumerator BaseBuilding(BaseCreator baseCreator, Vector3 position, ResourceFinder resourceFinder)
     {
-        AttachResource();
-        _botMover.MoveTo(_collectZonePosition, OnReturnedBase);
-    }
-
-    private void OnReturnedBase()
-    {
-        ResourceDelivered?.Invoke(_resource);
-        ReleaseResource();
+        IsWorking = true;
+        _botMover.MoveTo(position);
+        yield return new WaitUntil(() => _botMover.IsNearTarget());
+        baseCreator.Create(position, this, resourceFinder);
+        ConstructionCompleted?.Invoke(this);
         IsWorking = false;
     }
 
-    private void AttachResource()
+    private void AttachResource(Resource resource)
     {
-        _resource.transform.SetParent(transform);
-        _resource.transform.position = _resourceAttachPoint.position;
+        resource.transform.SetParent(transform);
+        resource.transform.position = _resourceAttachPoint.position;
     }
     
-    private void ReleaseResource()
+    private void ReleaseResource(Resource resource)
     {
-        _resource.transform.SetParent(null);
-        _resource.Release();
-        _resource = null;
+        resource.transform.SetParent(null);
+        resource.Release();
     }
 }

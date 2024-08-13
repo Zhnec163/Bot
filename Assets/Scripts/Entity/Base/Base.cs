@@ -1,24 +1,24 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[RequireComponent(typeof(ResourceBalance)), RequireComponent(typeof(ResourceScanner))]
+[RequireComponent(typeof(ResourceBalance)), RequireComponent(typeof(BotCreator)), RequireComponent(typeof(BaseCreator)), RequireComponent(typeof(ResourceScanner))]
 public class Base : MonoBehaviour
 {
-    [SerializeField] private int _costOfBot;
-    [SerializeField] private int _costOfBase;
     [SerializeField] private Transform _collectZone;
     [SerializeField] private Transform _botSpawn;
     [SerializeField] private List<Bot> _attachedBots;
     [SerializeField] private Flag _flag;
-    [SerializeField] private Bot _botPrefab;
 
+    private bool _isBuildBase;
     private List<Bot> _bots = new();
-    private Bot _buildingBot;
-    private bool _produceBase;
     private ResourceBalance _resourceBalance;
     private ResourceScanner _resourceScanner;
-    private List<Resource> _processedResources = new();
+    private BaseCreator _baseCreator;
+    private BotCreator _botCreator;
+
+    public bool IsBuildBase => _isBuildBase;
 
     private void Awake()
     {
@@ -30,53 +30,60 @@ public class Base : MonoBehaviour
 
         _resourceBalance = GetComponent<ResourceBalance>();
         _resourceScanner = GetComponent<ResourceScanner>();
+        _baseCreator = GetComponent<BaseCreator>();
+        _botCreator = GetComponent<BotCreator>();
     }
 
     private void Update()
     {
-        Produce();
-        GatherResources();
+        Production();
+        GatherResource();
     }
 
     private void OnDisable() => _bots.ForEach(bot => { bot.ResourceDelivered -= OnResourceDelivered; });
 
-    public void Init(Bot bot)
+    public void Init(Bot bot, ResourceFinder resourceFinder)
     {
+        _resourceScanner.Init(resourceFinder);
         InitializeBot(bot);
         _bots.Add(bot);
     }
 
-    public void TryBuildBase(Vector3 position)
+    public void ChangeFlagPosition(Vector3 position)
     {
-        if (_produceBase)
-        {
-            _flag.transform.position = position;
-        }
-        else
-        {
-            _produceBase = true;
-            _flag.transform.position = position;
-            _flag.gameObject.SetActive(true);
-        }
+        _flag.transform.position = position;
     }
 
-    private void Produce()
+    public void StartBuildingBase(Vector3 position)
     {
-        if (_produceBase)
+        _isBuildBase = true;
+        ChangeFlagPosition(position);
+        // _flag.gameObject.SetActive(true);
+    }
+
+    private void Production()
+    {
+        if (_isBuildBase)
         {
-            if (_resourceBalance.HasSum(_costOfBase))
+            if (_resourceBalance.HasSum(_baseCreator.Cost))
             {
-                _resourceBalance.Substract(_costOfBase);
-                BuildBase();
-                _produceBase = false;
+                if (TryGetFreeBot(out Bot bot))
+                {
+                    _resourceBalance.Substract(_baseCreator.Cost);
+                    bot.ConstructionCompleted += OnConstructionCompleted;
+                    bot.BuildBase(_baseCreator, _flag.transform.position, _resourceScanner.ResourceFinder);
+                    _isBuildBase = false;
+                }
             }
         }
         else
         {
-            if (_resourceBalance.HasSum(_costOfBot))
+            if (_resourceBalance.HasSum(_botCreator.Cost))
             {
-                _resourceBalance.Substract(_costOfBot);
-                BuildBot();
+                _resourceBalance.Substract(_botCreator.Cost);
+                Bot bot = _botCreator.Create(_botSpawn.position);
+                InitializeBot(bot);
+                _bots.Add(bot);
             }
         }
     }
@@ -87,56 +94,34 @@ public class Base : MonoBehaviour
         bot.ResourceDelivered += OnResourceDelivered;
     }
 
-    private void BuildBase()
+    private void GatherResource()
     {
-        _buildingBot = GetFreeBots()[0];
-        _buildingBot.ConstructionCompleted += OnConstructionCompleted;
-        _buildingBot.BuildBase(_flag.transform.position);
-    }
-
-    private void BuildBot()
-    {
-        Bot bot = Instantiate(_botPrefab, _botSpawn.position, _botPrefab.transform.rotation);
-        InitializeBot(bot);
-        _bots.Add(bot);
-    }
-
-    private void GatherResources()
-    {
-        List<Bot> freeBots = GetFreeBots();
-
-        if (freeBots.Count > 0)
+        if (TryGetFreeBot(out Bot bot))
         {
-            List<Resource> resources = _resourceScanner.Search();
-            resources = resources.Except(_processedResources).ToList();
-
-            foreach (var bot in freeBots)
-            {
-                if (resources.Count == 0)
-                    break;
-
-                Resource resource = resources[0];
-                _processedResources.Add(resource);
+            if (_resourceScanner.TryGetNearestResource(out Resource resource))
                 bot.BringResource(resource);
-                resources.Remove(resource);
-            }
         }
     }
 
-    private void OnConstructionCompleted()
+    private void OnConstructionCompleted(Bot bot)
     {
-        _bots.Remove(_buildingBot);
+        _bots.Remove(bot);
         _flag.gameObject.SetActive(false);
-        _buildingBot.ConstructionCompleted -= OnConstructionCompleted;
-        _flag.gameObject.SetActive(false);
-        _buildingBot = null;
+        bot.ConstructionCompleted -= OnConstructionCompleted;
     }
 
-    private List<Bot> GetFreeBots() => _bots.Where(bot => bot.IsWorking == false).ToList();
+    private bool TryGetFreeBot(out Bot bot)
+    {
+        bot = _bots.FirstOrDefault(bot => bot.IsWorking == false);
+
+        if (bot == null)
+            return false;
+
+        return true;
+    }
 
     private void OnResourceDelivered(Resource resource)
     {
         _resourceBalance.Increment();
-        _processedResources.Remove(resource);
     }
 }

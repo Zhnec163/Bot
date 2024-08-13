@@ -82,7 +82,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _resourceAttachPoint: {fileID: 4065949618383643185}
-  _basePrefab: {fileID: 7340594150533044117, guid: 30ea1b928accf5941b46bf3b79f4a6ec, type: 3}
 --- !u!114 &7825551577836300738
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,7 +94,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fccb55e9f8985814193c07d94b812f43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 2
+  _speed: 3
+  _minimumDistanceToTarget: 0.1
 --- !u!33 &8795529722733116979
 MeshFilter:
   m_ObjectHideFlags: 0
