@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(BotMover))]
 public class Bot : MonoBehaviour
@@ -8,6 +9,7 @@ public class Bot : MonoBehaviour
     [SerializeField] private Transform _resourceAttachPoint;
 
     private Vector3 _collectZonePosition;
+    private BaseBuilder _baseBuilder;
     private BotMover _botMover;
 
     public event Action<Resource> ResourceDelivered;
@@ -20,14 +22,15 @@ public class Bot : MonoBehaviour
 		_botMover = GetComponent<BotMover>();
     }
 
-    public void Init(Vector3 collectZonePosition)
+    public void Init(Vector3 collectZonePosition, BaseBuilder baseBuilder)
     {
         _collectZonePosition = collectZonePosition;
+        this._baseBuilder = baseBuilder;
     }
 
     public void BringResource(Resource resource) => StartCoroutine(ResourceCollecting(resource));
     
-    public void BuildBase(BaseCreator baseCreator, Vector3 position, ResourceFinder resourceFinder) => StartCoroutine(BaseBuilding(baseCreator, position, resourceFinder));
+    public void BuildBase(Vector3 position) => StartCoroutine(BaseBuilding(position));
 
     private IEnumerator ResourceCollecting(Resource resource)
     {
@@ -42,12 +45,12 @@ public class Bot : MonoBehaviour
         IsWorking = false;
     }
 
-    private IEnumerator BaseBuilding(BaseCreator baseCreator, Vector3 position, ResourceFinder resourceFinder)
+    private IEnumerator BaseBuilding(Vector3 position)
     {
         IsWorking = true;
         _botMover.MoveTo(position);
         yield return new WaitUntil(() => _botMover.IsNearTarget());
-        baseCreator.Create(position, this, resourceFinder);
+        _baseBuilder.Build(position, this);
         ConstructionCompleted?.Invoke(this);
         IsWorking = false;
     }

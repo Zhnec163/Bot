@@ -14,17 +14,15 @@ public class ResourceBalance : MonoBehaviour
         Changed?.Invoke();
     }
 
-    public bool HasSum(int value)
+    public bool TrySubstract(int value)
     {
         if (Balance >= value)
+        {
+            Balance -= value;
+            Changed?.Invoke();
             return true;
+        }
 
         return false;
-    }
-
-    public void Substract(int value)
-    {
-        Balance -= value;
-        Changed?.Invoke();
     }
 }
