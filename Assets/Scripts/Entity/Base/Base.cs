@@ -4,8 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-[RequireComponent(typeof(ResourceBalance)), RequireComponent(typeof(BotSpawner)),
- RequireComponent(typeof(ResourceScanner))]
+[RequireComponent(typeof(ResourceBalance)), RequireComponent(typeof(BotSpawner)), RequireComponent(typeof(ResourceScanner))]
 public class Base : MonoBehaviour
 {
     [SerializeField] private int _costOfBot;
@@ -14,15 +13,12 @@ public class Base : MonoBehaviour
     [SerializeField] private Transform _botSpawn;
     [SerializeField] private List<Bot> _attachedBots;
     [SerializeField] private Flag _flag;
-    [SerializeField] private BaseBuilder baseBuilder;
 
     private bool _isBuildBase;
     private List<Bot> _bots = new();
     private ResourceBalance _resourceBalance;
     private ResourceScanner _resourceScanner;
     private BotSpawner _botSpawner;
-
-    public bool IsBuildBase => _isBuildBase;
 
     private void Awake()
     {
@@ -45,24 +41,19 @@ public class Base : MonoBehaviour
 
     private void OnDisable() => _bots.ForEach(bot => { bot.ResourceDelivered -= OnResourceDelivered; });
 
-    public void Init(Bot bot, ResourceFinder resourceFinder, BaseBuilder baseBuilder)
+    public void Init(Bot bot, ResourceRepository resourceRepository)
     {
-        _resourceScanner.Init(resourceFinder);
-        this.baseBuilder = baseBuilder;
         InitializeBot(bot);
         _bots.Add(bot);
     }
 
-    public void ChangeFlagPosition(Vector3 position)
+    public void SetFlag(Vector3 position)
     {
-        _flag.transform.position = position;
-    }
-
-    public void StartBuildingBase(Vector3 position)
-    {
-        _isBuildBase = true;
         _flag.transform.position = position;
         _flag.gameObject.SetActive(true);
+
+        if (_isBuildBase == false)
+            _isBuildBase = true;
     }
 
     private void Production()
@@ -92,7 +83,7 @@ public class Base : MonoBehaviour
 
     private void InitializeBot(Bot bot)
     {
-        bot.Init(_collectZone.position, baseBuilder);
+        bot.Init(_collectZone.position);
         bot.ResourceDelivered += OnResourceDelivered;
     }
 
@@ -110,20 +101,14 @@ public class Base : MonoBehaviour
         _bots.Remove(bot);
         _flag.gameObject.SetActive(false);
         bot.ConstructionCompleted -= OnConstructionCompleted;
+        bot.ResourceDelivered -= OnResourceDelivered;
     }
 
     private bool TryGetFreeBot(out Bot bot)
     {
         bot = _bots.FirstOrDefault(bot => bot.IsWorking == false);
-
-        if (bot == null)
-            return false;
-
-        return true;
+        return bot == null ? false : true;
     }
 
-    private void OnResourceDelivered(Resource resource)
-    {
-        _resourceBalance.Increment();
-    }
+    private void OnResourceDelivered(Resource resource) => _resourceBalance.Increment();
 }

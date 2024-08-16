@@ -21,16 +21,11 @@ public class BaseClickHandler : MonoBehaviour
             if (_selectedBase == null)
                 return;
 
-            if (hit.transform.TryGetComponent(out Ground ground))
+            if (hit.transform.TryGetComponent<Ground>(out _))
             {
                 float offsetY = 0.5f;
                 Vector3 position = new Vector3(hit.point.x, hit.point.y + offsetY, hit.point.z);
-                
-                if (_selectedBase.IsBuildBase)
-                    _selectedBase.ChangeFlagPosition(position);
-                else
-                    _selectedBase.StartBuildingBase(position);
-                    
+                _selectedBase.SetFlag(position);
                 _selectedBase = null;
             }
         }

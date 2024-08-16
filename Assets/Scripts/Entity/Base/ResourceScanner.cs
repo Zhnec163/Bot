@@ -1,25 +1,47 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Base))]
 public class ResourceScanner : MonoBehaviour
 {
     [SerializeField] private float _scanRadius;
-    [SerializeField] private ResourceFinder _resourceFinder;
+    [SerializeField] private LayerMask _resourceMask;
+    [SerializeField] private ResourceRepository _resourceRepository;
+    
+    private Base _commandCenter;
 
-    public ResourceFinder ResourceFinder => _resourceFinder;
-
-    public void Init(ResourceFinder resourceFinder)
+    private void Awake()
     {
-        _resourceFinder = resourceFinder;
+        _commandCenter = GetComponent<Base>();
     }
 
-    public bool TryGetNearestResource(out Resource nearestResource)
+    public bool TryGetNearestResource(out Resource resource)
     {
-        nearestResource = _resourceFinder.GetNearestResource(transform.position, _scanRadius);
+        resource = null;
+        _resourceRepository.SynchronizeResources(_commandCenter, ScanResources());
 
-        if (nearestResource == null)
+        if (_resourceRepository.TryGetBaseResource(_commandCenter, out Resource nearestResource) == false)
             return false;
 
+        resource = nearestResource;
         return true;
+    }
+
+    private List<Resource> ScanResources()
+    {
+        List<Resource> resources = new List<Resource>();
+        Collider[] colliders = Physics.OverlapSphere(transform.position, _scanRadius, _resourceMask);
+
+        foreach (var collider in colliders)
+        {
+            if (collider.TryGetComponent(out Resource resource))
+                resources.Add(resource);
+        }
+
+        return resources;
     }
 }

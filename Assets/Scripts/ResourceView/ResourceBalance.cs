@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 
-[RequireComponent(typeof(Base))]
 public class ResourceBalance : MonoBehaviour
 {
     public event Action Changed;

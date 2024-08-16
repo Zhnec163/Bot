@@ -7,9 +7,9 @@ using UnityEngine.Serialization;
 public class Bot : MonoBehaviour
 {
     [SerializeField] private Transform _resourceAttachPoint;
+    [SerializeField] private BaseBuilder _baseBuilder;
 
     private Vector3 _collectZonePosition;
-    private BaseBuilder _baseBuilder;
     private BotMover _botMover;
 
     public event Action<Resource> ResourceDelivered;
@@ -22,10 +22,9 @@ public class Bot : MonoBehaviour
 		_botMover = GetComponent<BotMover>();
     }
 
-    public void Init(Vector3 collectZonePosition, BaseBuilder baseBuilder)
+    public void Init(Vector3 collectZonePosition)
     {
         _collectZonePosition = collectZonePosition;
-        this._baseBuilder = baseBuilder;
     }
 
     public void BringResource(Resource resource) => StartCoroutine(ResourceCollecting(resource));

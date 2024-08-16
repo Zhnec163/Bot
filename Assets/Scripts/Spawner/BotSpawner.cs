@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(Base))]
 public class BotSpawner : MonoBehaviour
 {
     [SerializeField] protected Bot _prefab;

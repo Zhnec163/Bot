@@ -2,11 +2,9 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(Bot))]
 public class BotMover : MonoBehaviour
 {
     [SerializeField] private float _speed;
-    [SerializeField] private float _minimumDistanceToTarget = 0.2f;
 
     private Vector3 _target;
     private Coroutine _currentMovement;
@@ -21,7 +19,7 @@ public class BotMover : MonoBehaviour
         _currentMovement = StartCoroutine(Moving());
     }
 
-    public bool IsNearTarget() => Vector3.Distance(transform.position, _target) < _minimumDistanceToTarget;
+    public bool IsNearTarget() => (transform.position - _target).sqrMagnitude < Mathf.Epsilon;
 
     private IEnumerator Moving()
     {

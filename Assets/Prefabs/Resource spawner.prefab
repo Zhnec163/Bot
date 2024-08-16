@@ -45,5 +45,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _prefab: {fileID: 7113961634526519160, guid: 6e4cdf23ecafb3347acf05bbccbfb0d2, type: 3}
-  _spawnRadius: 1
-  _spawnTimeStep: 1
+  _spawnRadius: 0.5
+  _spawnTimeStep: 0.3

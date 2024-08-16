@@ -6,12 +6,12 @@ using UnityEngine.Serialization;
 public class BaseBuilder : MonoBehaviour
 {
     [SerializeField] protected Base _prefab;
-    [SerializeField] private ResourceFinder _resourceFinder;
+    [SerializeField] private ResourceRepository _resourceRepository;
 
     public Base Build(Vector3 position, Bot bot)
     {
         Base commandCenter = Instantiate(_prefab, position, _prefab.transform.rotation);
-        commandCenter.Init(bot, _resourceFinder, this);
+        commandCenter.Init(bot, _resourceRepository);
         return commandCenter;
     }
 }

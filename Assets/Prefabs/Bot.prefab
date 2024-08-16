@@ -82,6 +82,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _resourceAttachPoint: {fileID: 4065949618383643185}
+  _baseBuilder: {fileID: 7775967142762043689, guid: 1665e3794a84a8e4498ffa901989b8e2, type: 3}
 --- !u!114 &7825551577836300738
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,7 +96,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _speed: 3
-  _minimumDistanceToTarget: 0.1
 --- !u!33 &8795529722733116979
 MeshFilter:
   m_ObjectHideFlags: 0
