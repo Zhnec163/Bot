@@ -35,7 +35,7 @@ public class Base : MonoBehaviour
 
     private void Update()
     {
-        Production();
+        Produce();
         GatherResource();
     }
 
@@ -56,7 +56,7 @@ public class Base : MonoBehaviour
             _isBuildBase = true;
     }
 
-    private void Production()
+    private void Produce()
     {
         if (_isBuildBase)
         {

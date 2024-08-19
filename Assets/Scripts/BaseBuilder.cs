@@ -5,7 +5,7 @@ using UnityEngine.Serialization;
 
 public class BaseBuilder : MonoBehaviour
 {
-    [SerializeField] protected Base _prefab;
+    [SerializeField] private Base _prefab;
     [SerializeField] private ResourceRepository _resourceRepository;
 
     public Base Build(Vector3 position, Bot bot)
